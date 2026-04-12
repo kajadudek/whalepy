@@ -86,9 +86,9 @@ class WOA:
 
 # ===================== TEST =======================
 
+# Rastrigin
 def f(x):
-    return py.sum(x ** 2, axis=1)
-
+    return py.sum(x ** 2 - 10 * py.cos(2 * py.pi * x) + 10, axis=1)
 
 # sphere
 def f2(x):
@@ -101,8 +101,8 @@ def f3(x):
 
 
 functions = [
-    ("Sphere", f),
-    ("Sphere (duplicate)", f2),
+    ("Rastrigin", f),
+    ("Sphere", f2),
     ("Rosenbrock", f3),
 ]
 
