@@ -1,0 +1,4 @@
+include README.md
+include LICENSE
+recursive-include whalepy/functions/functions_info *.json
+recursive-include doc *.rst

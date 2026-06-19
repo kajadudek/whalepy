@@ -106,13 +106,14 @@ functions = [
     ("Rosenbrock", f3),
 ]
 
-for name, func in functions:
-    print(f"\n=== {name} ===")
+if __name__ == "__main__":
+    for name, func in functions:
+        print(f"\n=== {name} ===")
 
-    woa = WOA(func, [10, 10], [-10, -10], 10, 20)  # 2D for Rosenbrock
-    results, best = woa.run()
+        woa = WOA(func, [10, 10], [-10, -10], 10, 20)  # 2D for Rosenbrock
+        results, best = woa.run()
 
-    print("Results:")
-    print("  values:", [float(v) for v in results])
-    print("  best x:", best)
-    print("  best y:", float(results[-1]))
+        print("Results:")
+        print("  values:", [float(v) for v in results])
+        print("  best x:", best)
+        print("  best y:", float(results[-1]))
