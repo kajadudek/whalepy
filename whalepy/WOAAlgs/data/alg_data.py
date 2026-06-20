@@ -62,10 +62,21 @@ class WOAData(BaseData):
 
 
 @dataclass
-class AdaptiveWOAData(BaseData):
-    adaptation_window: int = 10
-    adaptation_rule: str = "todo"
-    adaptive_schedule_name: str = "placeholder"
+class AdaptiveWOAData(WOAData):
+    a_strategy: str = "cosine"
+    use_inertia_weight: bool = True
+    adaptive_probability: bool = True
+    p_start: float = 0.5
+    p_end: float = 0.9
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        if self.a_strategy not in {"cosine", "logarithmic"}:
+            raise ValueError("a_strategy must be 'cosine' or 'logarithmic'.")
+        if not 0.0 <= self.p_start <= 1.0:
+            raise ValueError("p_start must be between 0.0 and 1.0.")
+        if not 0.0 <= self.p_end <= 1.0:
+            raise ValueError("p_end must be between 0.0 and 1.0.")
 
 
 @dataclass

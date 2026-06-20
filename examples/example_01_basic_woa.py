@@ -13,13 +13,13 @@ from whalepy.functions.function_loader import FunctionLoader
 def main() -> None:
     loader = FunctionLoader()
     config = WOAData(
-        population_size=25,
-        max_iter=80,
+        population_size=55,
+        max_iter=500,
         max_nfe=2200,
         dimension=5,
-        lb=[-5.0] * 5,
-        ub=[5.0] * 5,
-        function=loader.load_callable("sphere"),
+        lb=[-2.0] * 5,
+        ub=[2.0] * 5,
+        function=loader.load_callable("rosenbrock"),
         seed=7,
     )
     algorithm = WOA(config)

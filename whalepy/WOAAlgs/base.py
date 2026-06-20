@@ -97,7 +97,7 @@ class BaseWOAAlg(ABC):
             std_fitness_value=self.population.std_fitness(),
             history=list(self.history),
             success=self.best_whale is not None,
-            message="Plain WOA finished.",
+            message=f"{self.__class__.__name__} finished.",
             epochs_completed=self.current_epoch,
             nfe=self.fitness_function.evaluations,
         )
