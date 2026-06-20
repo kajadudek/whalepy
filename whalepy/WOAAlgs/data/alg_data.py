@@ -116,7 +116,17 @@ class MutationWOAData(BaseData):
 
 
 @dataclass
-class LevyWalkWOAData(BaseData):
+class LevyWalkWOAData(WOAData):
     levy_beta: float = 1.5
-    random_walk_rate: float = 0.1
-    walk_strategy_name: str = "placeholder"
+    levy_scale: float = 0.05
+    use_levy_exploration: bool = True
+    levy_mode: str = "exploration_only"
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        if not 0.0 < self.levy_beta <= 2.0:
+            raise ValueError("levy_beta must be in the interval (0.0, 2.0].")
+        if self.levy_scale <= 0.0:
+            raise ValueError("levy_scale must be greater than 0.0.")
+        if self.levy_mode not in {"exploration_only", "hybrid"}:
+            raise ValueError("levy_mode must be 'exploration_only' or 'hybrid'.")
