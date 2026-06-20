@@ -2,8 +2,8 @@
 
 `whalepy` is a research-oriented Python toolbox scaffold for the Whale Optimization Algorithm (WOA) family.
 
-This repository is currently a skeleton only. It provides package structure, placeholder classes, documentation stubs,
-and example stubs for future implementation work.
+The project now includes a first working implementation of the plain/basic Whale Optimization Algorithm for
+continuous benchmark functions.
 
 The scaffold uses a WOA-specific domain model built around `Whale` objects rather than generic evolutionary
 abstractions.
@@ -19,34 +19,39 @@ abstractions.
 
 ## Installation
 
-Placeholder installation flow:
+Basic installation:
 
 ```bash
 pip install .
 ```
 
-TODO: finalize packaging details and dependency list.
-
 ## Usage
 
-Placeholder future usage:
+Minimal working usage:
 
 ```python
 from whalepy import WOA
 from whalepy.WOAAlgs.data import WOAData
+from whalepy.functions.function_loader import FunctionLoader
 
+loader = FunctionLoader()
 config = WOAData(
-    population_size=30,
-    max_nfe=1000,
-    dimension=10,
-    lb=[-5.0] * 10,
-    ub=[5.0] * 10,
+    population_size=25,
+    max_iter=80,
+    max_nfe=2200,
+    dimension=5,
+    lb=[-5.0] * 5,
+    ub=[5.0] * 5,
+    function=loader.load_callable("sphere"),
+    seed=7,
 )
 
 algorithm = WOA(config)
+result = algorithm.run()
+print(result.best_fitness_value)
 ```
 
-The runtime behavior is not implemented yet.
+If both `max_iter` and `max_nfe` are provided, the run stops when the first budget is exhausted.
 
 ## Project Layout
 
@@ -62,5 +67,16 @@ doc/
 
 ## Status
 
-This project is intentionally scaffold-only at the moment. Real optimization logic, benchmark execution, plotting,
-persistence, and algorithm-specific movement rules will be added later.
+Implemented now:
+
+- plain/basic WOA
+- built-in Sphere, Ackley, Rastrigin, and Rosenbrock benchmark callables
+- WOA-specific `Whale` and `Population` models
+
+Still placeholder:
+
+- Adaptive WOA
+- CWOA
+- Modified Spiral Search WOA
+- Mutation-Based WOA
+- Random Walk WOA (Levy Flight)

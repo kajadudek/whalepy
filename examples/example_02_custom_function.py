@@ -1,27 +1,36 @@
-from whalepy import AdaptiveWOA
-from whalepy.WOAAlgs.data import AdaptiveWOAData
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from whalepy import WOA
+from whalepy.WOAAlgs.data import WOAData
 
 
 def custom_objective(candidate):
-    return sum(abs(value) for value in candidate)
+    return sum(abs(value) + 0.1 * value * value for value in candidate)
 
 
 def main() -> None:
-    config = AdaptiveWOAData(
-        population_size=15,
-        max_nfe=300,
+    config = WOAData(
+        population_size=20,
+        max_iter=60,
+        max_nfe=1500,
         dimension=3,
-        lb=[-1.0, -1.0, -1.0],
-        ub=[1.0, 1.0, 1.0],
+        lb=[-4.0, -4.0, -4.0],
+        ub=[4.0, 4.0, 4.0],
         function=custom_objective,
-        adaptation_rule="todo",
+        seed=11,
     )
-    algorithm = AdaptiveWOA(config)
+    algorithm = WOA(config)
+    result = algorithm.run()
 
-    print("This is a scaffold example only.")
-    print(f"Prepared algorithm: {algorithm.__class__.__name__}")
-    print("The WOA model is centered on whale positions and fitness values.")
-    print("TODO: add a runnable optimization example once implementation exists.")
+    print(f"Algorithm: {algorithm.__class__.__name__}")
+    print(f"Best fitness: {result.best_fitness_value}")
+    if result.best_whale is not None:
+        print(f"Best position: {result.best_whale.position}")
 
 
 if __name__ == "__main__":

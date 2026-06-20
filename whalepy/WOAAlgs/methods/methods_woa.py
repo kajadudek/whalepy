@@ -1,6 +1,65 @@
-def prepare_basic_epoch_state(*args, **kwargs):
-    raise NotImplementedError("Basic WOA helper logic is not implemented yet.")
+from __future__ import annotations
+
+import math
 
 
-def update_basic_positions(*args, **kwargs):
-    raise NotImplementedError("Basic WOA position updates are not implemented yet.")
+def update_control_parameter(epoch: int, max_iter: int) -> float:
+    if max_iter <= 0:
+        return 0.0
+    return 2.0 - (2.0 * epoch / max_iter)
+
+
+def encircle_best_whale(
+        whale_position: list[float],
+        best_position: list[float],
+        a_value: float,
+        c_value: float,
+) -> list[float]:
+    return [
+        best_coordinate - a_value * abs(c_value * best_coordinate - coordinate)
+        for coordinate, best_coordinate in zip(whale_position, best_position)
+    ]
+
+
+def explore_random_whale(
+        whale_position: list[float],
+        random_position: list[float],
+        a_value: float,
+        c_value: float,
+) -> list[float]:
+    return [
+        random_coordinate - a_value * abs(c_value * random_coordinate - coordinate)
+        for coordinate, random_coordinate in zip(whale_position, random_position)
+    ]
+
+
+def spiral_update(
+        whale_position: list[float],
+        best_position: list[float],
+        l_value: float,
+        spiral_constant: float,
+) -> list[float]:
+    return [
+        abs(best_coordinate - coordinate)
+        * math.exp(spiral_constant * l_value)
+        * math.cos(2.0 * math.pi * l_value)
+        + best_coordinate
+        for coordinate, best_coordinate in zip(whale_position, best_position)
+    ]
+
+
+def update_one_whale_position(
+        whale_position: list[float],
+        best_position: list[float],
+        random_position: list[float],
+        a_value: float,
+        c_value: float,
+        p_value: float,
+        l_value: float,
+        spiral_constant: float,
+) -> list[float]:
+    if p_value < 0.5:
+        if abs(a_value) < 1.0:
+            return encircle_best_whale(whale_position, best_position, a_value, c_value)
+        return explore_random_whale(whale_position, random_position, a_value, c_value)
+    return spiral_update(whale_position, best_position, l_value, spiral_constant)
