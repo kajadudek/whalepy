@@ -5,24 +5,29 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from whalepy import WOA
-from whalepy.WOAAlgs.data import WOAData
+from whalepy import AdaptiveWOA
+from whalepy.WOAAlgs.data import AdaptiveWOAData
 from whalepy.functions.function_loader import FunctionLoader
 
 
 def main() -> None:
     loader = FunctionLoader()
-    config = WOAData(
-        population_size=55,
-        max_iter=500,
+    config = AdaptiveWOAData(
+        population_size=25,
+        max_iter=80,
         max_nfe=2200,
         dimension=5,
-        lb=[-2.0] * 5,
-        ub=[2.0] * 5,
-        function=loader.load_callable("rosenbrock"),
+        lb=[-5.0] * 5,
+        ub=[5.0] * 5,
+        function=loader.load_callable("ackley"),
         seed=7,
+        a_strategy="cosine",
+        use_inertia_weight=True,
+        adaptive_probability=True,
+        p_start=0.5,
+        p_end=0.9,
     )
-    algorithm = WOA(config)
+    algorithm = AdaptiveWOA(config)
     result = algorithm.run()
 
     print(f"Algorithm: {algorithm.__class__.__name__}")
