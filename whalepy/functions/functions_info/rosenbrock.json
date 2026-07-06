@@ -1,6 +1,6 @@
 {
   "name": "rosenbrock",
   "display_name": "Rosenbrock",
-  "implemented": false,
-  "notes": "Placeholder benchmark metadata only."
+  "implemented": true,
+  "notes": "Continuous valley-shaped benchmark function."
 }

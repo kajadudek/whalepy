@@ -269,9 +269,66 @@ from whalepy import WOA, WOAData, run_algorithm
 result = run_algorithm(WOA, WOAData(...))
 ```
 
+## Benchmarking
+
+The repository includes a simple benchmark runner for comparing all implemented variants on the same benchmark
+setup.
+
+Run the full benchmark suite:
+
+```bash
+python benchmarks/benchmark_runner.py
+```
+
+Run a smaller smoke benchmark:
+
+```bash
+python benchmarks/benchmark_runner.py --smoke
+```
+
+Write per-run results to CSV:
+
+```bash
+python benchmarks/benchmark_runner.py --csv benchmarks/results/benchmark_results.csv
+```
+
+The benchmark runner compares:
+
+- WOA
+- AdaptiveWOA
+- CWOA
+- MutationWOA
+- ModifiedSpiralWOA
+- LevyWalkWOA
+
+The default registry includes these benchmark functions:
+
+- Ackley
+- Schwefel
+- Griewank
+- Michalewicz
+- Rastrigin
+- Rana
+- EggHolder
+- Rosenbrock
+
+Reported metrics include:
+
+- algorithm name
+- function name
+- dimension
+- run count
+- best fitness across runs
+- mean best fitness across runs
+- standard deviation of best fitness
+- average runtime
+- average completed epochs
+- average function evaluations
+
 ## Project Layout
 
 ```text
+benchmarks/
 whalepy/
   WOAAlgs/
   models/
@@ -291,5 +348,6 @@ Implemented now:
 - mutation-based WOA with DE/rand/1 candidate generation and fitness-based selection
 - modified spiral WOA with configurable logarithmic and Archimedean-style exploitation spirals
 - Levy walk WOA with Levy-flight exploration using Mantegna's algorithm
-- built-in Sphere, Ackley, Rastrigin, and Rosenbrock benchmark callables
+- built-in Ackley, Schwefel, Griewank, Michalewicz, Rastrigin, Rana, EggHolder, and Rosenbrock benchmark callables, with
+  Sphere still available for compatibility
 - WOA-specific `Whale` and `Population` models

@@ -1,6 +1,6 @@
 {
   "name": "sphere",
   "display_name": "Sphere",
-  "implemented": false,
-  "notes": "Placeholder benchmark metadata only."
+  "implemented": true,
+  "notes": "Continuous unimodal benchmark function."
 }

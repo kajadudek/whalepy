@@ -1,6 +1,6 @@
 {
-  "name": "ackley",
-  "display_name": "Ackley",
+  "name": "schwefel",
+  "display_name": "Schwefel",
   "implemented": true,
   "notes": "Continuous multimodal benchmark function."
 }

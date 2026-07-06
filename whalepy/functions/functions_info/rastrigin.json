@@ -1,6 +1,6 @@
 {
   "name": "rastrigin",
   "display_name": "Rastrigin",
-  "implemented": false,
-  "notes": "Placeholder benchmark metadata only."
+  "implemented": true,
+  "notes": "Continuous multimodal benchmark function."
 }
