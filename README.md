@@ -2,9 +2,8 @@
 
 `whalepy` is a research-oriented Python toolbox for the Whale Optimization Algorithm (WOA) family.
 
-The project now includes working implementations of plain/basic WOA, Adaptive WOA, and Chaotic WOA,
-Mutation-Based WOA, and Modified Spiral for continuous
-benchmark functions.
+The project now includes working implementations of plain/basic WOA, Adaptive WOA, Chaotic WOA,
+Mutation-Based WOA, Modified Spiral WOA, and Levy Walk WOA for continuous benchmark functions.
 
 The scaffold uses a WOA-specific domain model built around `Whale` objects rather than generic evolutionary
 abstractions.
@@ -26,6 +25,10 @@ Archimedean-style spiral that shrinks more gradually and covers the local neighb
 Mutation-Based WOA augments the standard WOA movement with DE-inspired mutation. In this project, the mutation
 variant keeps the normal WOA candidate, optionally creates a mutation candidate with `DE/rand/1`, evaluates both,
 and keeps the better one according to the optimization mode.
+
+Levy Walk WOA modifies the exploration phase with Levy-flight-based random walks. In this project, the Levy
+variant uses Mantegna-style heavy-tailed steps during exploration while keeping standard WOA-like exploitation
+around the best whale.
 
 ## Planned Variants
 
@@ -144,6 +147,41 @@ Chaotic WOA notes:
 - chaotic values can replace standard random draws for initialization, `r`, `p`, and `l`
 - `use_chaotic_a=True` optionally modulates the base convergence coefficient with chaos
 
+Levy Walk WOA usage:
+
+```python
+from whalepy import LevyWalkWOA
+from whalepy.WOAAlgs.data import LevyWalkWOAData
+from whalepy.functions.function_loader import FunctionLoader
+
+loader = FunctionLoader()
+config = LevyWalkWOAData(
+    population_size=30,
+    max_iter=120,
+    max_nfe=3800,
+    dimension=5,
+    lb=[-5.0] * 5,
+    ub=[5.0] * 5,
+    function=loader.load_callable("ackley"),
+    seed=7,
+    levy_beta=1.5,
+    levy_scale=0.05,
+    use_levy_exploration=True,
+    levy_mode="exploration_only",
+)
+
+result = LevyWalkWOA(config).run()
+print(result.best_fitness_value)
+```
+
+Levy Walk WOA notes:
+
+- `levy_beta` controls the heaviness of the Levy tail
+- `levy_scale` controls the overall exploration step size
+- `use_levy_exploration=True` enables Levy-flight exploration when `|A| >= 1`
+- `levy_mode="exploration_only"` uses only the Levy move in the exploration branch
+- `levy_mode="hybrid"` blends a standard WOA exploration candidate with a Levy-flight perturbation
+
 ## Project Layout
 
 ```text
@@ -165,5 +203,6 @@ Implemented now:
 - chaotic WOA with logistic, tent, and sine maps plus optional chaotic initialization and parameter draws
 - mutation-based WOA with DE/rand/1 candidate generation and fitness-based selection
 - modified spiral WOA with configurable logarithmic and Archimedean-style exploitation spirals
+- Levy walk WOA with Levy-flight exploration using Mantegna's algorithm
 - built-in Sphere, Ackley, Rastrigin, and Rosenbrock benchmark callables
 - WOA-specific `Whale` and `Population` models
