@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+import random
 
 from whalepy.WOAAlgs.methods.methods_woa import update_one_whale_position
 
@@ -8,6 +9,13 @@ from whalepy.WOAAlgs.methods.methods_woa import update_one_whale_position
 def sanitize_chaotic_value(value: float) -> float:
     epsilon = 1e-12
     return min(max(float(value), epsilon), 1.0 - epsilon)
+
+
+def derive_chaotic_seed(seed: int | None) -> float:
+    if seed is None:
+        return 0.37
+    derived_rng = random.Random(seed)
+    return sanitize_chaotic_value(derived_rng.random())
 
 
 def logistic_map_step(value: float, parameter: float = 4.0) -> float:

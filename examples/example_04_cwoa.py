@@ -20,7 +20,6 @@ def main() -> None:
         function=loader.load_callable("ackley"),
         seed=7,
         chaotic_map="logistic",
-        chaotic_seed=0.37,
         use_chaotic_initialization=True,
         use_chaotic_probability=True,
         use_chaotic_coefficients=True,

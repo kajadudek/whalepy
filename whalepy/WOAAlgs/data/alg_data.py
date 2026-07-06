@@ -82,7 +82,7 @@ class AdaptiveWOAData(WOAData):
 @dataclass
 class CWOAData(WOAData):
     chaotic_map: str = "logistic"
-    chaotic_seed: Optional[float] = 0.37
+    chaotic_seed: Optional[float] = None
     use_chaotic_initialization: bool = True
     use_chaotic_probability: bool = True
     use_chaotic_coefficients: bool = True
@@ -95,9 +95,7 @@ class CWOAData(WOAData):
         super().__post_init__()
         if self.chaotic_map not in {"logistic", "tent", "sine"}:
             raise ValueError("chaotic_map must be 'logistic', 'tent', or 'sine'.")
-        if self.chaotic_seed is None:
-            self.chaotic_seed = 0.37
-        if not 0.0 < self.chaotic_seed < 1.0:
+        if self.chaotic_seed is not None and not 0.0 < self.chaotic_seed < 1.0:
             raise ValueError("chaotic_seed must be between 0.0 and 1.0.")
 
 

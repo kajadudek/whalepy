@@ -3,6 +3,7 @@ from __future__ import annotations
 from whalepy.WOAAlgs.base import BaseWOAAlg
 from whalepy.WOAAlgs.methods.methods_cwoa import (
     chaotic_initialize_positions,
+    derive_chaotic_seed,
     chaotic_map_step,
     chaotic_value_to_index,
     chaotic_value_to_spiral_l,
@@ -18,7 +19,10 @@ from whalepy.models.whale import Whale
 class CWOA(BaseWOAAlg):
     def __init__(self, config, stop_condition=None) -> None:
         super().__init__(config, stop_condition=stop_condition)
-        self.chaotic_state = sanitize_chaotic_value(config.chaotic_seed)
+        initial_chaotic_seed = config.chaotic_seed
+        if initial_chaotic_seed is None:
+            initial_chaotic_seed = derive_chaotic_seed(config.seed)
+        self.chaotic_state = sanitize_chaotic_value(initial_chaotic_seed)
 
     def _advance_chaotic_state(self) -> float:
         self.chaotic_state = chaotic_map_step(
