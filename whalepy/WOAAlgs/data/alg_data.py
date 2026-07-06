@@ -102,10 +102,20 @@ class CWOAData(WOAData):
 
 
 @dataclass
-class ModifiedSpiralWOAData(BaseData):
-    spiral_mode: str = "placeholder"
-    spiral_shape_factor: float = 1.0
-    spiral_schedule_name: str = "todo"
+class ModifiedSpiralWOAData(WOAData):
+    spiral_mode: str = "archimedean"
+    spiral_b: float = 1.0
+    spiral_step: float = 0.25
+    spiral_shrink_factor: float = 0.75
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        if self.spiral_mode not in {"logarithmic", "archimedean"}:
+            raise ValueError("spiral_mode must be 'logarithmic' or 'archimedean'.")
+        if self.spiral_step < 0.0:
+            raise ValueError("spiral_step must be non-negative.")
+        if self.spiral_shrink_factor < 0.0:
+            raise ValueError("spiral_shrink_factor must be non-negative.")
 
 
 @dataclass
