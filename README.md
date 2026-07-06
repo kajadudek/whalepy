@@ -2,8 +2,9 @@
 
 `whalepy` is a research-oriented Python toolbox for the Whale Optimization Algorithm (WOA) family.
 
-The project now includes working implementations of plain/basic WOA, Adaptive WOA, Chaotic WOA,
-Mutation-Based WOA, and Modified Spiral WOA for continuous benchmark functions.
+The project now includes working implementations of plain/basic WOA, Adaptive WOA, and Chaotic WOA,
+Mutation-Based WOA, and Modified Spiral for continuous
+benchmark functions.
 
 The scaffold uses a WOA-specific domain model built around `Whale` objects rather than generic evolutionary
 abstractions.
@@ -21,6 +22,10 @@ the convergence coefficient `a`.
 Modified Spiral WOA keeps the standard WOA exploration behavior and changes only the exploitation spiral around
 the best whale. In this project, the variant supports both the standard logarithmic spiral and a practical
 Archimedean-style spiral that shrinks more gradually and covers the local neighborhood more evenly.
+
+Mutation-Based WOA augments the standard WOA movement with DE-inspired mutation. In this project, the mutation
+variant keeps the normal WOA candidate, optionally creates a mutation candidate with `DE/rand/1`, evaluates both,
+and keeps the better one according to the optimization mode.
 
 ## Planned Variants
 
@@ -139,40 +144,6 @@ Chaotic WOA notes:
 - chaotic values can replace standard random draws for initialization, `r`, `p`, and `l`
 - `use_chaotic_a=True` optionally modulates the base convergence coefficient with chaos
 
-Modified Spiral WOA usage:
-
-```python
-from whalepy import ModifiedSpiralWOA
-from whalepy.WOAAlgs.data import ModifiedSpiralWOAData
-from whalepy.functions.function_loader import FunctionLoader
-
-loader = FunctionLoader()
-config = ModifiedSpiralWOAData(
-    population_size=30,
-    max_iter=120,
-    max_nfe=3800,
-    dimension=5,
-    lb=[-5.0] * 5,
-    ub=[5.0] * 5,
-    function=loader.load_callable("ackley"),
-    seed=7,
-    spiral_mode="archimedean",
-    spiral_b=1.0,
-    spiral_step=0.25,
-    spiral_shrink_factor=0.75,
-)
-
-result = ModifiedSpiralWOA(config).run()
-print(result.best_fitness_value)
-```
-
-Modified Spiral WOA notes:
-
-- `spiral_mode="logarithmic"` keeps the standard WOA logarithmic spiral
-- `spiral_mode="archimedean"` uses a practical near-linear radial shrink term
-- `spiral_b` controls the logarithmic spiral intensity
-- `spiral_step` and `spiral_shrink_factor` control the gradual Archimedean-style tightening
-
 ## Project Layout
 
 ```text
@@ -196,7 +167,3 @@ Implemented now:
 - modified spiral WOA with configurable logarithmic and Archimedean-style exploitation spirals
 - built-in Sphere, Ackley, Rastrigin, and Rosenbrock benchmark callables
 - WOA-specific `Whale` and `Population` models
-
-Still placeholder:
-
-- Random Walk WOA (Levy Flight)
