@@ -18,6 +18,14 @@ chaotic variant supports logistic, tent, and sine maps, optional chaotic populat
 coefficient generation, chaotic branch probability, chaotic spiral values, and optional chaotic modulation of
 the convergence coefficient `a`.
 
+Modified Spiral WOA keeps the standard WOA exploration behavior and changes only the exploitation spiral around
+the best whale. In this project, the variant supports both the standard logarithmic spiral and a practical
+Archimedean-style spiral that shrinks more gradually and covers the local neighborhood more evenly.
+
+Mutation-Based WOA augments the standard WOA movement with DE-inspired mutation. In this project, the mutation
+variant keeps the normal WOA candidate, optionally creates a mutation candidate with `DE/rand/1`, evaluates both,
+and keeps the better one according to the optimization mode.
+
 Levy Walk WOA modifies the exploration phase with Levy-flight-based random walks. In this project, the Levy
 variant uses Mantegna-style heavy-tailed steps during exploration while keeping standard WOA-like exploitation
 around the best whale.
@@ -198,5 +206,3 @@ Implemented now:
 - Levy walk WOA with Levy-flight exploration using Mantegna's algorithm
 - built-in Sphere, Ackley, Rastrigin, and Rosenbrock benchmark callables
 - WOA-specific `Whale` and `Population` models
-
-All planned WOA variants in this project are now implemented.
