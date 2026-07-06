@@ -30,15 +30,6 @@ Levy Walk WOA modifies the exploration phase with Levy-flight-based random walks
 variant uses Mantegna-style heavy-tailed steps during exploration while keeping standard WOA-like exploitation
 around the best whale.
 
-## Planned Variants
-
-- WOA
-- Adaptive WOA
-- CWOA
-- Modified Spiral Search WOA
-- Mutation-Based WOA
-- Random Walk WOA (Levy Flight)
-
 ## Installation
 
 Basic installation:
@@ -49,12 +40,41 @@ pip install .
 
 ## Usage
 
-Minimal working usage:
+Common usage pattern:
 
 ```python
-from whalepy import WOA
-from whalepy.WOAAlgs.data import WOAData
-from whalepy.functions.function_loader import FunctionLoader
+config = VariantData(...)
+algorithm = Variant(config)
+result = algorithm.run()
+```
+
+Top-level imports are available for all implemented variants:
+
+```python
+from whalepy import (
+    AdaptiveWOA,
+    AdaptiveWOAData,
+    BoundaryConstraint,
+    CWOA,
+    CWOAData,
+    FunctionLoader,
+    LevyWalkWOA,
+    LevyWalkWOAData,
+    ModifiedSpiralWOA,
+    ModifiedSpiralWOAData,
+    MutationWOA,
+    MutationWOAData,
+    OptimizationType,
+    WOA,
+    WOAData,
+    run_algorithm,
+)
+```
+
+Basic WOA example:
+
+```python
+from whalepy import FunctionLoader, WOA, WOAData
 
 loader = FunctionLoader()
 config = WOAData(
@@ -73,14 +93,27 @@ result = algorithm.run()
 print(result.best_fitness_value)
 ```
 
-If both `max_iter` and `max_nfe` are provided, the run stops when the first budget is exhausted.
+Stopping rule:
+
+- `max_iter` is the primary loop budget
+- `max_nfe` is an additional evaluation cap
+- if both are provided, the algorithm stops when either limit is reached first
+
+Function handling:
+
+- use `FunctionLoader().load_callable("sphere")` for built-in benchmarks
+- or pass a plain Python callable with `function=my_objective`
+
+Boundary handling:
+
+- all variants accept `boundary_constraints_fun`
+- built-in choices include `BoundaryConstraint.CLIP`, `BoundaryConstraint.REFLECT`, and
+  `BoundaryConstraint.RANDOM_RESET`
 
 Adaptive WOA usage:
 
 ```python
-from whalepy import AdaptiveWOA
-from whalepy.WOAAlgs.data import AdaptiveWOAData
-from whalepy.functions.function_loader import FunctionLoader
+from whalepy import AdaptiveWOA, AdaptiveWOAData, FunctionLoader
 
 loader = FunctionLoader()
 config = AdaptiveWOAData(
@@ -113,9 +146,7 @@ Adaptive WOA notes:
 Chaotic WOA usage:
 
 ```python
-from whalepy import CWOA
-from whalepy.WOAAlgs.data import CWOAData
-from whalepy.functions.function_loader import FunctionLoader
+from whalepy import CWOA, CWOAData, FunctionLoader
 
 loader = FunctionLoader()
 config = CWOAData(
@@ -147,12 +178,60 @@ Chaotic WOA notes:
 - chaotic values can replace standard random draws for initialization, `r`, `p`, and `l`
 - `use_chaotic_a=True` optionally modulates the base convergence coefficient with chaos
 
+Mutation-Based WOA usage:
+
+```python
+from whalepy import FunctionLoader, MutationWOA, MutationWOAData
+
+loader = FunctionLoader()
+config = MutationWOAData(
+    population_size=30,
+    max_iter=100,
+    max_nfe=3500,
+    dimension=5,
+    lb=[-5.0] * 5,
+    ub=[5.0] * 5,
+    function=loader.load_callable("rastrigin"),
+    seed=7,
+    mutation_strategy="de_rand_1",
+    mutation_factor=0.6,
+    mutation_probability=0.35,
+    use_mutation_selection=True,
+)
+
+result = MutationWOA(config).run()
+print(result.best_fitness_value)
+```
+
+Modified Spiral WOA usage:
+
+```python
+from whalepy import FunctionLoader, ModifiedSpiralWOA, ModifiedSpiralWOAData
+
+loader = FunctionLoader()
+config = ModifiedSpiralWOAData(
+    population_size=30,
+    max_iter=120,
+    max_nfe=3800,
+    dimension=5,
+    lb=[-5.0] * 5,
+    ub=[5.0] * 5,
+    function=loader.load_callable("ackley"),
+    seed=7,
+    spiral_mode="archimedean",
+    spiral_b=1.0,
+    spiral_step=0.25,
+    spiral_shrink_factor=0.75,
+)
+
+result = ModifiedSpiralWOA(config).run()
+print(result.best_fitness_value)
+```
+
 Levy Walk WOA usage:
 
 ```python
-from whalepy import LevyWalkWOA
-from whalepy.WOAAlgs.data import LevyWalkWOAData
-from whalepy.functions.function_loader import FunctionLoader
+from whalepy import FunctionLoader, LevyWalkWOA, LevyWalkWOAData
 
 loader = FunctionLoader()
 config = LevyWalkWOAData(
@@ -181,6 +260,14 @@ Levy Walk WOA notes:
 - `use_levy_exploration=True` enables Levy-flight exploration when `|A| >= 1`
 - `levy_mode="exploration_only"` uses only the Levy move in the exploration branch
 - `levy_mode="hybrid"` blends a standard WOA exploration candidate with a Levy-flight perturbation
+
+Optional convenience helper:
+
+```python
+from whalepy import WOA, WOAData, run_algorithm
+
+result = run_algorithm(WOA, WOAData(...))
+```
 
 ## Project Layout
 
