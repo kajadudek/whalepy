@@ -109,10 +109,20 @@ class ModifiedSpiralWOAData(BaseData):
 
 
 @dataclass
-class MutationWOAData(BaseData):
-    mutation_rate: float = 0.1
-    mutation_operator_name: str = "placeholder"
-    elitism_enabled: bool = False
+class MutationWOAData(WOAData):
+    mutation_strategy: str = "de_rand_1"
+    mutation_factor: float = 0.5
+    mutation_probability: float = 0.3
+    use_mutation_selection: bool = True
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        if self.mutation_strategy != "de_rand_1":
+            raise ValueError("mutation_strategy must be 'de_rand_1'.")
+        if self.mutation_factor <= 0.0:
+            raise ValueError("mutation_factor must be greater than 0.0.")
+        if not 0.0 <= self.mutation_probability <= 1.0:
+            raise ValueError("mutation_probability must be between 0.0 and 1.0.")
 
 
 @dataclass
