@@ -4,9 +4,10 @@ import math
 
 
 def update_control_parameter(epoch: int, max_iter: int) -> float:
-    if max_iter <= 0:
-        return 0.0
-    return 2.0 - (2.0 * epoch / max_iter)
+    if max_iter <= 1:
+        return 2.0
+    progress = min(max(epoch / (max_iter - 1), 0.0), 1.0)
+    return 2.0 - 2.0 * progress
 
 
 def encircle_best_whale(

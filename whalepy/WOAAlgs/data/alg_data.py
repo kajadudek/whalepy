@@ -148,3 +148,41 @@ class LevyWalkWOAData(WOAData):
             raise ValueError("levy_scale must be greater than 0.0.")
         if self.levy_mode not in {"exploration_only", "hybrid"}:
             raise ValueError("levy_mode must be 'exploration_only' or 'hybrid'.")
+
+
+@dataclass
+class GaussianWOAData(WOAData):
+    pass
+
+
+@dataclass
+class OppositionWOAData(WOAData):
+    use_obl_initialization: bool = True
+
+
+@dataclass
+class SingleDimensionalWOAData(WOAData):
+    pass
+
+
+@dataclass
+class WorstIndividualDisturbanceWOAData(WOAData):
+    pass
+
+
+@dataclass
+class ExponentialDecayWOAData(WOAData):
+    a_initial: float = 2.0
+    a_final: float = 0.0
+    k: float = 0.5
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        if self.a_initial <= 0.0:
+            raise ValueError("a_initial must be greater than 0.0.")
+        if self.a_final < 0.0:
+            raise ValueError("a_final must be greater than or equal to 0.0.")
+        if self.a_final >= self.a_initial:
+            raise ValueError("a_final must be strictly smaller than a_initial.")
+        if self.k <= 0.0:
+            raise ValueError("k must be greater than 0.0.")

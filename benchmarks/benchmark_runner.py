@@ -15,15 +15,25 @@ from whalepy import (
     AdaptiveWOAData,
     CWOA,
     CWOAData,
+    ExponentialDecayWOA,
+    ExponentialDecayWOAData,
     FunctionLoader,
+    GaussianWOA,
+    GaussianWOAData,
     LevyWalkWOA,
     LevyWalkWOAData,
     ModifiedSpiralWOA,
     ModifiedSpiralWOAData,
     MutationWOA,
     MutationWOAData,
+    OppositionBasedWOA,
+    OppositionWOAData,
+    SingleDimensionalWOA,
+    SingleDimensionalWOAData,
     WOA,
     WOAData,
+    WorstIndividualDisturbanceWOA,
+    WorstIndividualDisturbanceWOAData,
 )
 
 
@@ -124,6 +134,42 @@ ALGORITHM_SPECS = [
             "levy_scale": 0.05,
             "use_levy_exploration": True,
             "levy_mode": "exploration_only",
+        },
+    ),
+    AlgorithmSpec(
+        name="GaussianWOA",
+        algorithm_cls=GaussianWOA,
+        config_cls=GaussianWOAData,
+        variant_kwargs={},
+    ),
+    AlgorithmSpec(
+        name="OppositionBasedWOA",
+        algorithm_cls=OppositionBasedWOA,
+        config_cls=OppositionWOAData,
+        variant_kwargs={
+            "use_obl_initialization": True,
+        },
+    ),
+    AlgorithmSpec(
+        name="SingleDimensionalWOA",
+        algorithm_cls=SingleDimensionalWOA,
+        config_cls=SingleDimensionalWOAData,
+        variant_kwargs={},
+    ),
+    AlgorithmSpec(
+        name="WorstIndividualDisturbanceWOA",
+        algorithm_cls=WorstIndividualDisturbanceWOA,
+        config_cls=WorstIndividualDisturbanceWOAData,
+        variant_kwargs={},
+    ),
+    AlgorithmSpec(
+        name="ExponentialDecayWOA",
+        algorithm_cls=ExponentialDecayWOA,
+        config_cls=ExponentialDecayWOAData,
+        variant_kwargs={
+            "a_initial": 2.0,
+            "a_final": 0.0,
+            "k": 0.5,
         },
     ),
 ]

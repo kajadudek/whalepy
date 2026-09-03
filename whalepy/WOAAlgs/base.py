@@ -71,13 +71,23 @@ class BaseWOAAlg(ABC):
         self.best_whale = self.population.get_best_whale(self.config.optimization_type)
         self.worst_whale = self.population.get_worst_whale(self.config.optimization_type)
 
+    def initialization_nfe_cost(self) -> int:
+        return int(self.config.population_size)
+
+    def epoch_nfe_cost(self) -> int:
+        return int(self.config.population_size)
+
     def _resolve_max_iter_reference(self) -> int:
         if self.config.max_iter is not None:
             return max(1, self.config.max_iter)
         if self.config.max_nfe is not None:
-            remaining_evaluations = max(self.config.max_nfe - self.config.population_size, 0)
-            estimated_iterations = math.ceil(remaining_evaluations / self.config.population_size)
-            return max(1, estimated_iterations)
+            init_cost = int(self.initialization_nfe_cost())
+            per_iter_cost = int(self.epoch_nfe_cost())
+            if per_iter_cost <= 0:
+                return 1
+            remaining_evaluations = max(int(self.config.max_nfe) - init_cost, 0)
+            estimated_iterations = math.ceil(remaining_evaluations / per_iter_cost)
+            return max(1, int(estimated_iterations))
         return 1
 
     def _can_continue(self) -> bool:

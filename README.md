@@ -3,7 +3,9 @@
 `whalepy` is a research-oriented Python toolbox for the Whale Optimization Algorithm (WOA) family.
 
 The project now includes working implementations of plain/basic WOA, Adaptive WOA, Chaotic WOA,
-Mutation-Based WOA, Modified Spiral WOA, and Levy Walk WOA for continuous benchmark functions.
+Mutation-Based WOA, Modified Spiral WOA, Levy Walk WOA, Gaussian Mutation WOA, Opposition-Based
+WOA, Single-Dimensional WOA, Worst-Individual-Disturbance WOA, and Exponential Decay WOA for
+continuous benchmark problems.
 
 The scaffold uses a WOA-specific domain model built around `Whale` objects rather than generic evolutionary
 abstractions.
@@ -29,6 +31,35 @@ and keeps the better one according to the optimization mode.
 Levy Walk WOA modifies the exploration phase with Levy-flight-based random walks. In this project, the Levy
 variant uses Mantegna-style heavy-tailed steps during exploration while keeping standard WOA-like exploitation
 around the best whale.
+
+Gaussian Mutation WOA (GM-WOA) runs the standard WOA update unchanged, then applies a multiplicative
+Gaussian mutation `X' = X^A * (1 + G)` (element-wise) with `G ~ N(0, I)` to every whale, where `X^A` is
+the position produced by the base WOA step. The mutated candidate replaces the current position only if it
+improves the fitness (greedy selection). Because the perturbation is proportional to `|X^A_i|`, coordinates
+near zero are barely changed while coordinates far from the origin can move substantially. Implementation
+follows Luo et al. (2019).
+
+Opposition-Based WOA reuses the base WOA main loop unchanged and only modifies population initialization.
+A random population of size N is generated, an opposite candidate `x_opp = lb + ub - x` is produced for
+each whale, both sets are evaluated, and the best N individuals from the resulting pool of 2N candidates
+form the starting population.
+
+Single-Dimensional WOA replaces the classical encircling-prey step with the single-dimensional swimming
+mechanism from Du et al. (2020). Instead of updating the full position vector, a single randomly
+selected coordinate `d` is updated via `X_d(t+1) = X*_d(t) - A * |C * X*_d(t) - X_d(t)|`, while all
+other coordinates stay unchanged. The exploration branch and the spiral branch are inherited from the
+base WOA without modification.
+
+Worst-Individual-Disturbance WOA disturbs the classical encircling step with information about the
+worst individual in the population, following the individual-disturbance strategy from Qiao et al.
+(2022). The encircling update `X_new = X_best - A*D` is replaced with
+`X_new = r_4 * X_best - A*D + (1 - r_4) * X_worst`, where `r_4` is drawn uniformly from `[0, 1]`
+.This introduces information about the worst individual into the encircling update while retaining the best individual as a reference point.
+The exploration branch and the spiral branch stay identical to the base WOA.
+
+Exponential WOA replaces the standard linear schedule of the convergence coefficient a
+with a nonlinear schedule based on an exponential function. 
+The remaining WOA movement mechanisms are unchanged.
 
 ## Installation
 
@@ -57,16 +88,26 @@ from whalepy import (
     BoundaryConstraint,
     CWOA,
     CWOAData,
+    ExponentialDecayWOA,
+    ExponentialDecayWOAData,
     FunctionLoader,
+    GaussianWOA,
+    GaussianWOAData,
     LevyWalkWOA,
     LevyWalkWOAData,
     ModifiedSpiralWOA,
     ModifiedSpiralWOAData,
     MutationWOA,
     MutationWOAData,
+    OppositionBasedWOA,
+    OppositionWOAData,
     OptimizationType,
+    SingleDimensionalWOA,
+    SingleDimensionalWOAData,
     WOA,
     WOAData,
+    WorstIndividualDisturbanceWOA,
+    WorstIndividualDisturbanceWOAData,
     run_algorithm,
 )
 ```
@@ -98,6 +139,8 @@ Stopping rule:
 - `max_iter` is the primary loop budget
 - `max_nfe` is an additional evaluation cap
 - if both are provided, the algorithm stops when either limit is reached first
+- most variants spend one evaluation per whale per iteration, but GM-WOA and Opposition-Based WOA
+  spend more, so they use up `max_nfe` faster — see their notes below
 
 Function handling:
 
@@ -261,6 +304,181 @@ Levy Walk WOA notes:
 - `levy_mode="exploration_only"` uses only the Levy move in the exploration branch
 - `levy_mode="hybrid"` blends a standard WOA exploration candidate with a Levy-flight perturbation
 
+Gaussian WOA usage:
+
+```python
+from whalepy import FunctionLoader, GaussianWOA, GaussianWOAData
+
+loader = FunctionLoader()
+config = GaussianWOAData(
+    population_size=30,
+    max_iter=120,
+    max_nfe=3800,
+    dimension=5,
+    lb=[-5.0] * 5,
+    ub=[5.0] * 5,
+    function=loader.load_callable("ackley"),
+    seed=7,
+)
+
+result = GaussianWOA(config).run()
+print(result.best_fitness_value)
+```
+
+Gaussian Mutation WOA (GM-WOA) notes:
+
+- runs the standard WOA update on the whole population, producing positions `X^A`
+- then applies a multiplicative Gaussian mutation `X' = X^A * (1 + G)` (element-wise, `G ~ N(0, I)`)
+  to every whale, following Luo et al. (2019)
+- the mutated candidate is accepted only if it improves the fitness (greedy selection); otherwise the
+  standard WOA position `X^A` is kept
+- the perturbation scale on coordinate `i` is proportional to `|X^A_i|`, so points near the origin are
+  perturbed only slightly and points far from it can move substantially
+- the base WOA operators (encircling, spiral update, random exploration) are unchanged; there are no
+  additional parameters beyond those inherited from `WOAData`
+- one iteration costs two evaluations per whale (the WOA step plus the mutated candidate), so with the
+  settings above the run completes 62 full iterations and may enter a partial 63rd one before
+  reaching `max_nfe=3800`
+- to allow the same number of full iterations as the other variants, GM-WOA requires approximately
+  twice the evaluation budget, since each iteration evaluates both the standard WOA candidate and the
+  Gaussian-mutated candidate
+
+Opposition-Based WOA usage:
+
+```python
+from whalepy import FunctionLoader, OppositionBasedWOA, OppositionWOAData
+
+loader = FunctionLoader()
+config = OppositionWOAData(
+    population_size=30,
+    max_iter=120,
+    max_nfe=3800,
+    dimension=5,
+    lb=[-5.0] * 5,
+    ub=[5.0] * 5,
+    function=loader.load_callable("ackley"),
+    seed=7,
+    use_obl_initialization=True,
+)
+
+result = OppositionBasedWOA(config).run()
+print(result.best_fitness_value)
+```
+
+Opposition-Based WOA notes:
+
+- `use_obl_initialization=True` (default) generates an opposite candidate `x_opp = lb + ub - x` for every
+  random whale and keeps the best N individuals from the combined pool of 2N candidates as the starting
+  population
+- `use_obl_initialization=False` disables the OBL step and makes the algorithm behave exactly like base WOA
+- the main loop is inherited from base WOA without modification
+- initialization costs `2 * population_size` evaluations instead of `population_size`, so `max_nfe`
+  must be at least that large or the algorithm raises a `ValueError`
+
+Single-Dimensional WOA usage:
+
+```python
+from whalepy import FunctionLoader, SingleDimensionalWOA, SingleDimensionalWOAData
+
+loader = FunctionLoader()
+config = SingleDimensionalWOAData(
+    population_size=30,
+    max_iter=120,
+    max_nfe=3800,
+    dimension=5,
+    lb=[-5.0] * 5,
+    ub=[5.0] * 5,
+    function=loader.load_callable("ackley"),
+    seed=7,
+)
+
+result = SingleDimensionalWOA(config).run()
+print(result.best_fitness_value)
+```
+
+Single-Dimensional WOA notes:
+
+- implements only the single-dimensional swimming mechanism from Du et al. (2020, Symmetry 12(11), 1892)
+- whenever the base WOA would run its encircling-prey update (`p < 0.5` and `|A| < 1`), a single
+  randomly selected coordinate `d` is updated via `X_d(t+1) = X*_d(t) - A * |C * X*_d(t) - X_d(t)|`
+- all other coordinates keep their current values
+- the exploration branch and the spiral update are identical to the base WOA
+- there are no additional configuration parameters beyond those inherited from `WOAData`
+
+Worst-Individual-Disturbance WOA usage:
+
+```python
+from whalepy import (
+    FunctionLoader,
+    WorstIndividualDisturbanceWOA,
+    WorstIndividualDisturbanceWOAData,
+)
+
+loader = FunctionLoader()
+config = WorstIndividualDisturbanceWOAData(
+    population_size=30,
+    max_iter=120,
+    max_nfe=3800,
+    dimension=5,
+    lb=[-5.0] * 5,
+    ub=[5.0] * 5,
+    function=loader.load_callable("ackley"),
+    seed=7,
+)
+
+result = WorstIndividualDisturbanceWOA(config).run()
+print(result.best_fitness_value)
+```
+
+Worst-Individual-Disturbance WOA notes:
+
+- implements the individual-disturbance strategy from Qiao et al. (2022), eq. 9
+- the classical encircling formula `X_new = X_best - A*D` is replaced with
+  `X_new = r_4 * X_best - A*D + (1 - r_4) * X_worst`, where `r_4` is drawn uniformly from `[0, 1]`
+- only the individual-disturbance component is retained; the neighborhood mutation search proposed
+  alongside it in the same paper is not applied
+- the exploration branch and the spiral update are identical to the base WOA
+- there are no additional configuration parameters beyond those inherited from `WOAData`
+
+Exponential Decay WOA usage:
+
+```python
+from whalepy import ExponentialDecayWOA, ExponentialDecayWOAData, FunctionLoader
+
+loader = FunctionLoader()
+config = ExponentialDecayWOAData(
+    population_size=30,
+    max_iter=120,
+    max_nfe=3800,
+    dimension=5,
+    lb=[-5.0] * 5,
+    ub=[5.0] * 5,
+    function=loader.load_callable("ackley"),
+    seed=7,
+    a_initial=2.0,
+    a_final=0.0,
+    k=0.5,
+)
+
+result = ExponentialDecayWOA(config).run()
+print(result.best_fitness_value)
+```
+
+Exponential Decay WOA notes:
+
+- implements the nonlinear convergence coefficient from Sun et al. (2022, eq. 12):
+  `a(t) = a_initial - (a_initial - a_final) * (exp(tau^k) - 1) / (e - 1)`
+- if `T` denotes the total number of scheduled iterations, then `tau = t / (T - 1)` for
+  `t = 0, ..., T - 1`
+- boundary conditions are exact: `a(0) == a_initial` and `a(T - 1) == a_final`
+- `k > 0` shapes the curve: smaller values make `a` drop quickly early in the run, larger values keep
+  it high for longer (at the halfway point, `k=0.3` gives `a ≈ 0.54` while `k=0.9` gives `a ≈ 1.18`)
+- the useful range is problem-dependent, so `k` is exposed as a configuration parameter
+- the example above uses `k=0.5` for demonstration; the benchmark experiments run for this project
+  used `k=0.7`
+- only the update rule for `a` is taken from Sun et al.; the rest of the algorithm
+  (encircling, spiral update, random exploration) is identical to the base WOA
+
 Optional convenience helper:
 
 ```python
@@ -300,6 +518,11 @@ The benchmark runner compares:
 - MutationWOA
 - ModifiedSpiralWOA
 - LevyWalkWOA
+- GaussianWOA
+- OppositionBasedWOA
+- SingleDimensionalWOA
+- WorstIndividualDisturbanceWOA
+- ExponentialDecayWOA
 
 The default registry includes these benchmark functions:
 
@@ -348,6 +571,15 @@ Implemented now:
 - mutation-based WOA with DE/rand/1 candidate generation and fitness-based selection
 - modified spiral WOA with configurable logarithmic and Archimedean-style exploitation spirals
 - Levy walk WOA with Levy-flight exploration using Mantegna's algorithm
+- Gaussian Mutation WOA (GM-WOA) that appends a multiplicative Gaussian perturbation
+  `X^A * (1 + G)` with greedy selection after each standard WOA update
+- opposition-based WOA that seeds the population with the best N individuals from N random whales and their
+  opposite counterparts
+- single-dimensional WOA that replaces the encircling-prey step with a single-coordinate update from
+  Du et al. (2020)
+- worst-individual-disturbance WOA that perturbs the encircling step with information from the worst
+  individual, following Qiao et al. (2022)
+- exponential decay WOA with an exponential decay schedule for the convergence coefficient
 - built-in Ackley, Schwefel, Griewank, Michalewicz, Rastrigin, Rana, EggHolder, and Rosenbrock benchmark callables, with
   Sphere still available for compatibility
 - WOA-specific `Whale` and `Population` models
