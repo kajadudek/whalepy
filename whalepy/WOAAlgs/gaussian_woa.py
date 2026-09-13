@@ -10,6 +10,19 @@ from whalepy.models.enums.boundary_constrain import repair_position
 
 
 class GaussianWOA(WOA):
+    """
+    GaussianWOA
+
+    Links:
+    https://www.sciencedirect.com/science/article/pii/S0307904X19301908
+
+    References:
+    Luo, J., Chen, H., Heidari, A.A., Xu, Y., Zhang, Q., Li, C., 2019.
+    Multi-strategy boosted mutative whale-inspired optimization approaches.
+    Applied Mathematical Modelling 73, 109–123.
+    https://doi.org/10.1016/j.apm.2019.03.046
+    """
+
     def epoch_nfe_cost(self) -> int:
         return 2 * int(self.config.population_size)
 

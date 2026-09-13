@@ -6,6 +6,17 @@ from typing import Any, Optional
 
 @dataclass
 class Whale:
+    """
+    A single whale, i.e. a candidate solution.
+
+    Attributes:
+        position: Values of the decision variables.
+        fitness_value: Value of the objective function (None before the evaluation).
+        lb: Lower bounds of the decision variables.
+        ub: Upper bounds of the decision variables.
+        metadata: Additional information stored by the variants.
+    """
+
     position: list[float] = field(default_factory=list)
     fitness_value: Optional[float] = None
     lb: list[float] = field(default_factory=list)

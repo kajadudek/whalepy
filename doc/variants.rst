@@ -1,21 +1,30 @@
 Variants
 ========
 
-Implemented variants:
+Implemented variants and their reference publications (the parameters of each variant are
+described on its API page):
 
-- Basic WOA
-- Adaptive WOA
-- CWOA (Chaotic WOA)
-- Modified Spiral Search WOA
-- Mutation-Based WOA
-- Levy Walk WOA
-- Gaussian Mutation WOA (GM-WOA)
-- Opposition-Based WOA
-- Single-Dimensional WOA
-- Worst-Individual-Disturbance WOA
-- Exponential Decay WOA
+- ``WOA`` -- Mirjalili and Lewis (2016).
+- ``AdaptiveWOA`` -- nonlinear (cosine or logarithmic) schedule of ``a``, adaptive inertia weight
+  and adaptive spiral probability; Trivedi et al. (2016), Chen et al. (2020), Sun et al. (2022).
+- ``CWOA`` -- random numbers replaced with logistic, tent or sine chaotic maps, optional chaotic
+  initialization; Kaur and Arora (2018).
+- ``MutationWOA`` -- DE/rand/1 mutation applied after the WOA update, accepted if it improves the
+  candidate; Mostafa Bozorgi and Yazdani (2019).
+- ``ModifiedSpiralWOA`` -- logarithmic or Archimedean-style spiral in the bubble-net attack;
+  Sun et al. (2018).
+- ``LevyWalkWOA`` -- Levy flights (Mantegna's algorithm) in the exploration phase;
+  Ling et al. (2017).
+- ``GaussianWOA`` -- multiplicative Gaussian mutation with greedy selection; Luo et al. (2019).
+- ``OppositionBasedWOA`` -- opposition-based initialization; Alamri et al. (2018).
+- ``SingleDimensionalWOA`` -- single-dimensional encircling update; Du et al. (2020).
+- ``WorstIndividualDisturbanceWOA`` -- encircling update disturbed by the worst individual;
+  Qiao et al. (2022).
+- ``ExponentialDecayWOA`` -- exponential schedule of ``a``; Sun et al. (2022).
 
-Notes on the additional variants:
+Full references are listed in the README and in the docstring of every algorithm class.
+
+Notes on selected variants:
 
 - Gaussian Mutation WOA (GM-WOA): keeps the standard WOA update unchanged and
   appends a multiplicative Gaussian mutation ``X' = X^A * (1 + G)``

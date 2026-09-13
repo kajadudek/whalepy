@@ -9,6 +9,31 @@ from whalepy.models.enums.boundary_constrain import repair_position
 
 
 class AdaptiveWOA(BaseWOAAlg):
+    """
+    AdaptiveWOA
+
+    Links:
+    https://indjst.org/articles/a-novel-adaptive-whale-optimization-algorithm-for-global-optimization
+    https://www.sciencedirect.com/science/article/abs/pii/S0957417419307353
+    https://link.springer.com/article/10.1007/s44196-022-00092-7
+
+    References:
+    Trivedi, I.N., Pradeep, J., Narottam, J., Arvind, K., Dilip, L., 2016.
+    Novel Adaptive Whale Optimization Algorithm for Global Optimization.
+    Indian Journal of Science and Technology 9.
+    https://doi.org/10.17485/ijst/2016/v9i38/101939
+
+    Chen, H., Yang, C., Heidari, A.A., Zhao, X., 2020.
+    An efficient double adaptive random spare reinforced whale optimization
+    algorithm. Expert Systems with Applications 154, 113018.
+    https://doi.org/10.1016/j.eswa.2019.113018
+
+    Sun, G., Shang, Y., Yuan, K., Gao, H., 2022.
+    An Improved Whale Optimization Algorithm Based on Nonlinear Parameters
+    and Feedback Mechanism. Int J Comput Intell Syst 15.
+    https://doi.org/10.1007/s44196-022-00092-7
+    """
+
     def next_epoch(self) -> None:
         if self.best_whale is None:
             return

@@ -13,6 +13,20 @@ from whalepy.models.enums.boundary_constrain import repair_position
 
 
 class WorstIndividualDisturbanceWOA(BaseWOAAlg):
+    """
+    WorstIndividualDisturbanceWOA
+
+    Links:
+    https://academic.oup.com/jcde/article/9/5/1817/6668798
+
+    References:
+    Qiao, S., Yu, H., Heidari, A.A., El-Saleh, A.A., Cai, Z., Xu, X.,
+    Mafarja, M., Chen, H., 2022. Individual disturbance and neighborhood
+    mutation search enhanced whale optimization: performance design for
+    engineering problems. Journal of Computational Design and Engineering 9,
+    1817–1851. https://doi.org/10.1093/jcde/qwac081
+    """
+
 
     def next_epoch(self) -> None:
         if self.best_whale is None or self.worst_whale is None:

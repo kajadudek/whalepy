@@ -95,7 +95,6 @@ ALGORITHM_SPECS = [
         config_cls=CWOAData,
         variant_kwargs={
             "chaotic_map": "logistic",
-            "chaotic_seed": 0.37,
             "use_chaotic_initialization": True,
             "use_chaotic_probability": True,
             "use_chaotic_coefficients": True,

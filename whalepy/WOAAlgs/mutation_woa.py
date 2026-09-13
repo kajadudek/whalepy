@@ -13,6 +13,19 @@ from whalepy.models.enums.boundary_constrain import repair_position
 
 
 class MutationWOA(BaseWOAAlg):
+    """
+    MutationWOA
+
+    Links:
+    https://academic.oup.com/jcde/article/6/3/243/5732340
+
+    References:
+    Mostafa Bozorgi, S., Yazdani, S., 2019. IWOA: An improved whale
+    optimization algorithm for optimization problems. Journal of
+    Computational Design and Engineering 6, 243–259.
+    https://doi.org/10.1016/j.jcde.2019.02.002
+    """
+
     def next_epoch(self) -> None:
         if self.best_whale is None:
             return

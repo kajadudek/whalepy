@@ -7,6 +7,7 @@ from typing import Optional
 
 from whalepy.WOAAlgs.data.alg_data import BaseData
 from whalepy.models.algorithm_result import AlgorithmResult
+from whalepy.models.enums.optimization import OptimizationType
 from whalepy.models.fitness_function import FitnessFunction, coerce_fitness_function
 from whalepy.models.population import Population
 from whalepy.models.stop_condition.never_stop_condition import NeverStopCondition
@@ -15,6 +16,22 @@ from whalepy.models.whale import Whale
 
 
 class BaseWOAAlg(ABC):
+    """
+    Base class of all WOA variants.
+
+    It implements the common optimization loop: initialization and evaluation of the
+    population, tracking of the best solution found so far (``best_whale``, which is the
+    leader ``X*`` used in the position updates) and of the worst whale in the current
+    population (``worst_whale``), checking of the stopping criteria, and preparation of the
+    result. Each variant implements :meth:`next_epoch`, which performs a single iteration.
+
+    Parameters:
+        config: Configuration of the variant (an instance of a subclass of
+            :class:`~whalepy.BaseData`).
+        stop_condition: Optional stopping condition. If not given, ``config.stop_condition``
+            is used.
+    """
+
     def __init__(
             self,
             config: BaseData,
@@ -50,6 +67,14 @@ class BaseWOAAlg(ABC):
         self.initialized = True
 
     def run(self) -> AlgorithmResult:
+        """
+        Runs the optimization until ``max_iter`` or ``max_nfe`` is reached or the stopping
+        condition is met.
+
+        Returns:
+            AlgorithmResult: The best solution found, statistics of the final population, and
+            the convergence history.
+        """
         if not self.initialized:
             self._initialize()
 
@@ -68,13 +93,32 @@ class BaseWOAAlg(ABC):
         return self._build_result()
 
     def _refresh_population_state(self) -> None:
-        self.best_whale = self.population.get_best_whale(self.config.optimization_type)
+        # best_whale is the best solution found so far (the leader X* and the
+        # returned result); worst_whale refers to the current population.
+        current_best = self.population.get_best_whale(self.config.optimization_type)
+        if current_best is not None and current_best.fitness_value is not None and (
+                self.best_whale is None
+                or self.best_whale.fitness_value is None
+                or self._is_better(current_best.fitness_value, self.best_whale.fitness_value)
+        ):
+            self.best_whale = current_best
         self.worst_whale = self.population.get_worst_whale(self.config.optimization_type)
 
+    def _is_better(self, candidate: float, reference: float) -> bool:
+        if self.config.optimization_type == OptimizationType.MAXIMIZATION:
+            return candidate > reference
+        return candidate < reference
+
     def initialization_nfe_cost(self) -> int:
+        """
+        Number of objective function evaluations used by the initialization.
+        """
         return int(self.config.population_size)
 
     def epoch_nfe_cost(self) -> int:
+        """
+        Number of objective function evaluations used by a single iteration.
+        """
         return int(self.config.population_size)
 
     def _resolve_max_iter_reference(self) -> int:
@@ -114,6 +158,9 @@ class BaseWOAAlg(ABC):
 
     @abstractmethod
     def next_epoch(self) -> None:
+        """
+        Performs a single iteration of the algorithm. Implemented by each variant.
+        """
         raise NotImplementedError
 
 

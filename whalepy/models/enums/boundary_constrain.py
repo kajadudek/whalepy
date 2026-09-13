@@ -6,6 +6,14 @@ from typing import Any, Callable
 
 
 class BoundaryConstraint(str, Enum):
+    """
+    Methods of handling whales that leave the search space.
+
+    ``CLIP`` sets each coordinate outside the bounds to the nearest bound, ``REFLECT``
+    reflects it from the bound, ``RANDOM_RESET`` draws a new value from the allowed range,
+    and ``NONE`` leaves the position unchanged.
+    """
+
     CLIP = "clip"
     REFLECT = "reflect"
     RANDOM_RESET = "random_reset"

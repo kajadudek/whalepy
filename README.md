@@ -7,6 +7,22 @@ Mutation-Based WOA, Modified Spiral WOA, Levy Walk WOA, Gaussian Mutation WOA, O
 WOA, Single-Dimensional WOA, Worst-Individual-Disturbance WOA, and Exponential Decay WOA for
 continuous benchmark problems.
 
+The following variants have been implemented:
+
+| No. | Algorithm                                                     | Year | Publication                                         |
+|-----|---------------------------------------------------------------|------|-----------------------------------------------------|
+| 1   | WOA (Whale Optimization Algorithm)                            | 2016 | Mirjalili & Lewis [1]                               |
+| 2   | AdaptiveWOA (Adaptive Whale Optimization Algorithm)           | 2016 | Trivedi et al. [2], Chen et al. [3], Sun et al. [4] |
+| 3   | CWOA (Chaotic WOA)                                            | 2018 | Kaur & Arora [5]                                    |
+| 4   | MutationWOA (Mutation-Based WOA, DE/rand/1)                   | 2019 | Mostafa Bozorgi & Yazdani [6]                       |
+| 5   | ModifiedSpiralWOA (Modified Spiral WOA)                       | 2018 | Sun et al. [7]                                      |
+| 6   | LevyWalkWOA (Levy Flight WOA)                                 | 2017 | Ling et al. [8]                                     |
+| 7   | GaussianWOA (Gaussian Mutation WOA, GM-WOA)                   | 2019 | Luo et al. [9]                                      |
+| 8   | OppositionBasedWOA (Opposition-Based WOA)                     | 2018 | Alamri et al. [10]                                  |
+| 9   | SingleDimensionalWOA (WOA with Single-Dimensional Swimming)   | 2020 | Du et al. [11]                                      |
+| 10  | WorstIndividualDisturbanceWOA (Individual Disturbance WOA)    | 2022 | Qiao et al. [12]                                    |
+| 11  | ExponentialDecayWOA (WOA with Exponential Convergence Factor) | 2022 | Sun et al. [4]                                      |
+
 The scaffold uses a WOA-specific domain model built around `Whale` objects rather than generic evolutionary
 abstractions.
 
@@ -21,7 +37,7 @@ coefficient generation, chaotic branch probability, chaotic spiral values, and o
 the convergence coefficient `a`.
 
 Modified Spiral WOA keeps the standard WOA exploration behavior and changes only the exploitation spiral around
-the best whale. In this project, the variant supports both the standard logarithmic spiral and a practical
+the leader (the best solution found so far). In this project, the variant supports both the standard logarithmic spiral and a practical
 Archimedean-style spiral that shrinks more gradually and covers the local neighborhood more evenly.
 
 Mutation-Based WOA augments the standard WOA movement with DE-inspired mutation. In this project, the mutation
@@ -30,7 +46,7 @@ and keeps the better one according to the optimization mode.
 
 Levy Walk WOA modifies the exploration phase with Levy-flight-based random walks. In this project, the Levy
 variant uses Mantegna-style heavy-tailed steps during exploration while keeping standard WOA-like exploitation
-around the best whale.
+around the leader (the best solution found so far).
 
 Gaussian Mutation WOA (GM-WOA) runs the standard WOA update unchanged, then applies a multiplicative
 Gaussian mutation `X' = X^A * (1 + G)` (element-wise) with `G ~ N(0, I)` to every whale, where `X^A` is
@@ -141,6 +157,13 @@ Stopping rule:
 - if both are provided, the algorithm stops when either limit is reached first
 - most variants spend one evaluation per whale per iteration, but GM-WOA and Opposition-Based WOA
   spend more, so they use up `max_nfe` faster — see their notes below
+
+Result:
+
+- `result.best_whale` and `result.best_fitness_value` describe the best solution found during the whole run;
+  this solution is also the leader `X*` used in the position updates
+- `result.history` contains the best fitness value found so far after the initialization and after each iteration
+- `result.worst_whale`, `result.mean_fitness_value` and `result.std_fitness_value` describe the final population
 
 Function handling:
 
@@ -583,3 +606,18 @@ Implemented now:
 - built-in Ackley, Schwefel, Griewank, Michalewicz, Rastrigin, Rana, EggHolder, and Rosenbrock benchmark callables, with
   Sphere still available for compatibility
 - WOA-specific `Whale` and `Population` models
+
+## References
+
+1. Mirjalili, S., Lewis, A., 2016. The Whale Optimization Algorithm. Advances in Engineering Software 95, 51–67. https://doi.org/10.1016/j.advengsoft.2016.01.008
+2. Trivedi, I.N., Pradeep, J., Narottam, J., Arvind, K., Dilip, L., 2016. Novel Adaptive Whale Optimization Algorithm for Global Optimization. Indian Journal of Science and Technology 9. https://doi.org/10.17485/ijst/2016/v9i38/101939
+3. Chen, H., Yang, C., Heidari, A.A., Zhao, X., 2020. An efficient double adaptive random spare reinforced whale optimization algorithm. Expert Systems with Applications 154, 113018. https://doi.org/10.1016/j.eswa.2019.113018
+4. Sun, G., Shang, Y., Yuan, K., Gao, H., 2022. An Improved Whale Optimization Algorithm Based on Nonlinear Parameters and Feedback Mechanism. Int J Comput Intell Syst 15. https://doi.org/10.1007/s44196-022-00092-7
+5. Kaur, G., Arora, S., 2018. Chaotic whale optimization algorithm. Journal of Computational Design and Engineering 5, 275–284. https://doi.org/10.1016/j.jcde.2017.12.006
+6. Mostafa Bozorgi, S., Yazdani, S., 2019. IWOA: An improved whale optimization algorithm for optimization problems. Journal of Computational Design and Engineering 6, 243–259. https://doi.org/10.1016/j.jcde.2019.02.002
+7. Sun, W., Wang, J., Wei, X., 2018. An Improved Whale Optimization Algorithm Based on Different Searching Paths and Perceptual Disturbance. Symmetry 10, 210. https://doi.org/10.3390/sym10060210
+8. Ling, Y., Zhou, Y., Luo, Q., 2017. Lévy Flight Trajectory-Based Whale Optimization Algorithm for Global Optimization. IEEE Access 5, 6168–6186. https://doi.org/10.1109/access.2017.2695498
+9. Luo, J., Chen, H., Heidari, A.A., Xu, Y., Zhang, Q., Li, C., 2019. Multi-strategy boosted mutative whale-inspired optimization approaches. Applied Mathematical Modelling 73, 109–123. https://doi.org/10.1016/j.apm.2019.03.046
+10. Alamri, H.S., Alsariera, Y.A., Zamli, K.Z., 2018. Opposition-Based Whale Optimization Algorithm. adv sci lett 24, 7461–7464. https://doi.org/10.1166/asl.2018.12959
+11. Du, P., Cheng, W., Liu, N., Zhang, H., Lu, J., 2020. A Modified Whale Optimization Algorithm with Single-Dimensional Swimming for Global Optimization Problems. Symmetry 12, 1892. https://doi.org/10.3390/sym12111892
+12. Qiao, S., Yu, H., Heidari, A.A., El-Saleh, A.A., Cai, Z., Xu, X., Mafarja, M., Chen, H., 2022. Individual disturbance and neighborhood mutation search enhanced whale optimization: performance design for engineering problems. Journal of Computational Design and Engineering 9, 1817–1851. https://doi.org/10.1093/jcde/qwac081

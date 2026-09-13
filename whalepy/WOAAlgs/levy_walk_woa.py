@@ -10,6 +10,18 @@ from whalepy.models.enums.boundary_constrain import repair_position
 
 
 class LevyWalkWOA(BaseWOAAlg):
+    """
+    LevyWalkWOA
+
+    Links:
+    https://ieeexplore.ieee.org/document/7904636/
+
+    References:
+    Ling, Y., Zhou, Y., Luo, Q., 2017. Lévy Flight Trajectory-Based Whale
+    Optimization Algorithm for Global Optimization. IEEE Access 5, 6168–6186.
+    https://doi.org/10.1109/access.2017.2695498
+    """
+
     def next_epoch(self) -> None:
         if self.best_whale is None:
             return

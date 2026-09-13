@@ -11,6 +11,19 @@ from whalepy.models.enums.boundary_constrain import repair_position
 
 
 class SingleDimensionalWOA(BaseWOAAlg):
+    """
+    SingleDimensionalWOA
+
+    Links:
+    https://www.mdpi.com/2073-8994/12/11/1892
+
+    References:
+    Du, P., Cheng, W., Liu, N., Zhang, H., Lu, J., 2020. A Modified Whale
+    Optimization Algorithm with Single-Dimensional Swimming for Global
+    Optimization Problems. Symmetry 12, 1892.
+    https://doi.org/10.3390/sym12111892
+    """
+
     def next_epoch(self) -> None:
         if self.best_whale is None:
             return

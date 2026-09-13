@@ -12,8 +12,8 @@ def sanitize_chaotic_value(value: float) -> float:
 
 
 def derive_chaotic_seed(seed: int | None) -> float:
-    if seed is None:
-        return 0.37
+    # The initial value of the chaotic map is derived from the run seed, so runs with
+    # different seeds (or without a seed) follow different chaotic sequences.
     derived_rng = random.Random(seed)
     return sanitize_chaotic_value(derived_rng.random())
 

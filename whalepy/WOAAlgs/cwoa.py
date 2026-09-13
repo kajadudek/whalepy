@@ -17,6 +17,18 @@ from whalepy.models.whale import Whale
 
 
 class CWOA(BaseWOAAlg):
+    """
+    CWOA
+
+    Links:
+    https://www.sciencedirect.com/science/article/pii/S228843001730132X
+
+    References:
+    Kaur, G., Arora, S., 2018. Chaotic whale optimization algorithm.
+    Journal of Computational Design and Engineering 5, 275–284.
+    https://doi.org/10.1016/j.jcde.2017.12.006
+    """
+
     def __init__(self, config, stop_condition=None) -> None:
         super().__init__(config, stop_condition=stop_condition)
         initial_chaotic_seed = config.chaotic_seed

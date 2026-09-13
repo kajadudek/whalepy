@@ -7,6 +7,19 @@ from whalepy.models.enums.boundary_constrain import repair_position
 
 
 class ExponentialDecayWOA(BaseWOAAlg):
+    """
+    ExponentialDecayWOA
+
+    Links:
+    https://link.springer.com/article/10.1007/s44196-022-00092-7
+
+    References:
+    Sun, G., Shang, Y., Yuan, K., Gao, H., 2022.
+    An Improved Whale Optimization Algorithm Based on Nonlinear Parameters
+    and Feedback Mechanism. Int J Comput Intell Syst 15.
+    https://doi.org/10.1007/s44196-022-00092-7
+    """
+
     def next_epoch(self) -> None:
         if self.best_whale is None:
             return

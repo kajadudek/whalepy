@@ -9,6 +9,36 @@ from whalepy.models.enums.optimization import OptimizationType
 
 @dataclass
 class BaseData:
+    """
+    Parameters shared by all WOA variants.
+
+    Parameters:
+        population_size: Number of whales in the population. Default: 30.
+        max_iter: Maximum number of iterations. Default: 100. If both ``max_iter`` and
+            ``max_nfe`` are None, 100 iterations are used.
+        max_nfe: Maximum number of objective function evaluations. Default: None (no limit).
+            If both limits are given, the run stops when the first of them is reached.
+        dimension: Number of decision variables. Default: 10.
+        lb: Lower bounds of the decision variables. If a single value is given, it is used
+            for all dimensions. Required.
+        ub: Upper bounds of the decision variables. If a single value is given, it is used
+            for all dimensions. Required.
+        optimization_type: ``OptimizationType.MINIMIZATION`` (default) or
+            ``OptimizationType.MAXIMIZATION``.
+        function: Objective function. Any Python function that takes a list of decision
+            variables and returns a number, or a benchmark function loaded with
+            :class:`~whalepy.FunctionLoader`. Required.
+        boundary_constraints_fun: Method used when a whale leaves the search space:
+            ``BoundaryConstraint.CLIP`` (default), ``BoundaryConstraint.REFLECT``,
+            ``BoundaryConstraint.RANDOM_RESET``, ``BoundaryConstraint.NONE``, or a user-defined
+            function ``f(candidate, lb, ub)`` that returns the repaired position.
+        stop_condition: Optional user-defined stopping condition
+            (:class:`~whalepy.models.stop_condition.StopCondition`), checked after the
+            initialization and after each iteration. Default: None.
+        seed: Seed of the random number generator, which makes the results reproducible.
+            Default: None.
+    """
+
     population_size: int = 30
     max_iter: Optional[int] = 100
     max_nfe: Optional[int] = None
@@ -18,12 +48,8 @@ class BaseData:
     optimization_type: OptimizationType = OptimizationType.MINIMIZATION
     function: Optional[Callable[..., Any]] = None
     boundary_constraints_fun: BoundaryConstraint | str | Callable[..., Any] = BoundaryConstraint.CLIP
-    log_population: bool = False
-    parallel_processing: bool = False
-    show_plots: bool = False
     stop_condition: Any = None
     seed: Optional[int] = None
-    notes: str = ""
 
     def __post_init__(self) -> None:
         if self.population_size <= 0:
@@ -56,13 +82,43 @@ class BaseData:
 
 @dataclass
 class WOAData(BaseData):
-    shrink_coefficient_strategy: str = "linear"
+    """
+    Configuration of the original WOA (:class:`~whalepy.WOA`) and the base configuration of
+    all variants. Inherits the parameters of :class:`~whalepy.BaseData`.
+
+    Parameters:
+        encircling_probability: Probability of the encircling or exploration move instead of
+            the spiral move. Used only by :class:`~whalepy.AdaptiveWOA` when
+            ``adaptive_probability`` is False; the other variants use the value 0.5 of the
+            original algorithm. Default: 0.5.
+        spiral_constant: Constant ``b`` defining the shape of the logarithmic spiral.
+            Default: 1.0.
+    """
+
     encircling_probability: float = 0.5
     spiral_constant: float = 1.0
 
 
 @dataclass
 class AdaptiveWOAData(WOAData):
+    """
+    Configuration of :class:`~whalepy.AdaptiveWOA`. Inherits the parameters of
+    :class:`~whalepy.WOAData`.
+
+    Parameters:
+        a_strategy: Nonlinear schedule of the coefficient ``a``: ``"cosine"``
+            (``a = 2 cos(pi t / (2T))``) or ``"logarithmic"`` (``a = 2 - log10(1 + 9 t / T)``).
+            Default: ``"cosine"``.
+        use_inertia_weight: If True, the position of the leader in the encircling move is
+            multiplied by an inertia weight that increases linearly from 0.5 to 1.0.
+            Default: True.
+        adaptive_probability: If True, the probability of the spiral move increases linearly
+            from ``p_start`` to ``p_end`` during the run; otherwise it is equal to
+            ``1 - encircling_probability``. Default: True.
+        p_start: Probability of the spiral move at the beginning of the run. Default: 0.5.
+        p_end: Probability of the spiral move at the end of the run. Default: 0.9.
+    """
+
     a_strategy: str = "cosine"
     use_inertia_weight: bool = True
     adaptive_probability: bool = True
@@ -81,6 +137,29 @@ class AdaptiveWOAData(WOAData):
 
 @dataclass
 class CWOAData(WOAData):
+    """
+    Configuration of :class:`~whalepy.CWOA`. Inherits the parameters of
+    :class:`~whalepy.WOAData`.
+
+    Parameters:
+        chaotic_map: Chaotic map used to generate the chaotic values: ``"logistic"``,
+            ``"tent"`` or ``"sine"``. Default: ``"logistic"``.
+        chaotic_seed: Initial value of the chaotic map, from the interval (0, 1). If None,
+            it is derived from ``seed``. Default: None.
+        use_chaotic_initialization: If True, the initial positions are generated with the
+            chaotic map. Default: True.
+        use_chaotic_probability: If True, the random number ``p`` that selects the move is
+            replaced with a chaotic value. Default: True.
+        use_chaotic_coefficients: If True, the random numbers ``r1`` and ``r2`` used in the
+            coefficients ``A`` and ``C`` are replaced with chaotic values. Default: True.
+        use_chaotic_spiral: If True, the spiral parameter ``l`` is generated with the chaotic
+            map. Default: True.
+        use_chaotic_a: If True, the coefficient ``a`` is additionally multiplied by a chaotic
+            value. Default: False.
+        logistic_a: Control parameter of the logistic map. Default: 4.0.
+        sine_a: Control parameter of the sine map. Default: 4.0.
+    """
+
     chaotic_map: str = "logistic"
     chaotic_seed: Optional[float] = None
     use_chaotic_initialization: bool = True
@@ -101,6 +180,21 @@ class CWOAData(WOAData):
 
 @dataclass
 class ModifiedSpiralWOAData(WOAData):
+    """
+    Configuration of :class:`~whalepy.ModifiedSpiralWOA`. Inherits the parameters of
+    :class:`~whalepy.WOAData`.
+
+    Parameters:
+        spiral_mode: Shape of the spiral used in the bubble-net attack: ``"archimedean"`` or
+            ``"logarithmic"`` (the spiral of the original WOA). Default: ``"archimedean"``.
+        spiral_b: Constant ``b`` of the logarithmic spiral (used when ``spiral_mode`` is
+            ``"logarithmic"``). Default: 1.0.
+        spiral_step: Growth rate of the radius of the Archimedean spiral with ``|l|``.
+            Default: 0.25.
+        spiral_shrink_factor: Additional radius of the Archimedean spiral, which decreases
+            linearly to zero during the run. Default: 0.75.
+    """
+
     spiral_mode: str = "archimedean"
     spiral_b: float = 1.0
     spiral_step: float = 0.25
@@ -118,6 +212,22 @@ class ModifiedSpiralWOAData(WOAData):
 
 @dataclass
 class MutationWOAData(WOAData):
+    """
+    Configuration of :class:`~whalepy.MutationWOA`. Inherits the parameters of
+    :class:`~whalepy.WOAData`. The population must contain at least 4 whales.
+
+    Parameters:
+        mutation_strategy: Mutation strategy. Currently only ``"de_rand_1"`` (DE/rand/1) is
+            available. Default: ``"de_rand_1"``.
+        mutation_factor: Scale factor ``F`` of the DE/rand/1 mutation. Default: 0.5.
+        mutation_probability: Probability that a mutation candidate is created for a whale;
+            it is also the probability of taking each coordinate of this candidate from the
+            mutant vector instead of the WOA candidate. Default: 0.3.
+        use_mutation_selection: If True, the better of the WOA candidate and the mutation
+            candidate is kept; otherwise the mutation candidate always replaces the WOA
+            candidate. Default: True.
+    """
+
     mutation_strategy: str = "de_rand_1"
     mutation_factor: float = 0.5
     mutation_probability: float = 0.3
@@ -135,6 +245,21 @@ class MutationWOAData(WOAData):
 
 @dataclass
 class LevyWalkWOAData(WOAData):
+    """
+    Configuration of :class:`~whalepy.LevyWalkWOA`. Inherits the parameters of
+    :class:`~whalepy.WOAData`.
+
+    Parameters:
+        levy_beta: Stability index ``beta`` of the Levy distribution (Mantegna's algorithm),
+            from the interval (0, 2]. Default: 1.5.
+        levy_scale: Scale of the Levy flight step. Default: 0.05.
+        use_levy_exploration: If True, the exploration move is replaced with a Levy flight.
+            Default: True.
+        levy_mode: ``"exploration_only"`` uses the Levy flight candidate, ``"hybrid"`` uses
+            the average of the Levy flight candidate and the standard exploration move.
+            Default: ``"exploration_only"``.
+    """
+
     levy_beta: float = 1.5
     levy_scale: float = 0.05
     use_levy_exploration: bool = True
@@ -152,26 +277,57 @@ class LevyWalkWOAData(WOAData):
 
 @dataclass
 class GaussianWOAData(WOAData):
-    pass
+    """
+    Configuration of :class:`~whalepy.GaussianWOA`. Uses the parameters of
+    :class:`~whalepy.WOAData`; the variant has no additional parameters.
+    """
 
 
 @dataclass
 class OppositionWOAData(WOAData):
+    """
+    Configuration of :class:`~whalepy.OppositionBasedWOA`. Inherits the parameters of
+    :class:`~whalepy.WOAData`.
+
+    Parameters:
+        use_obl_initialization: If True, the initial population is selected from the random
+            population and its opposite population (2 * ``population_size`` evaluations).
+            Default: True.
+    """
+
     use_obl_initialization: bool = True
 
 
 @dataclass
 class SingleDimensionalWOAData(WOAData):
-    pass
+    """
+    Configuration of :class:`~whalepy.SingleDimensionalWOA`. Uses the parameters of
+    :class:`~whalepy.WOAData`; the variant has no additional parameters.
+    """
 
 
 @dataclass
 class WorstIndividualDisturbanceWOAData(WOAData):
-    pass
+    """
+    Configuration of :class:`~whalepy.WorstIndividualDisturbanceWOA`. Uses the parameters of
+    :class:`~whalepy.WOAData`; the variant has no additional parameters.
+    """
 
 
 @dataclass
 class ExponentialDecayWOAData(WOAData):
+    """
+    Configuration of :class:`~whalepy.ExponentialDecayWOA`. Inherits the parameters of
+    :class:`~whalepy.WOAData`. The coefficient ``a`` follows the schedule
+    ``a(t) = a_initial - (a_initial - a_final) * (exp(tau ** k) - 1) / (e - 1)``,
+    where ``tau = t / (T - 1)``.
+
+    Parameters:
+        a_initial: Value of ``a`` in the first iteration. Default: 2.0.
+        a_final: Value of ``a`` in the last iteration. Default: 0.0.
+        k: Shape parameter of the schedule (``k > 0``). Default: 0.5.
+    """
+
     a_initial: float = 2.0
     a_final: float = 0.0
     k: float = 0.5

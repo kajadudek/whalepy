@@ -9,5 +9,9 @@ if TYPE_CHECKING:
 
 
 class NeverStopCondition(StopCondition):
+    """
+    Stopping condition that never stops the run. Used when no condition is given.
+    """
+
     def should_stop(self, algorithm: Any, best_whale: "Whale | None" = None) -> bool:
         return False

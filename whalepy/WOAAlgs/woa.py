@@ -9,6 +9,18 @@ from whalepy.models.enums.boundary_constrain import repair_position
 
 
 class WOA(BaseWOAAlg):
+    """
+    WOA
+
+    Links:
+    https://www.sciencedirect.com/science/article/abs/pii/S0965997816300163
+
+    References:
+    Mirjalili, S., Lewis, A., 2016. The Whale Optimization Algorithm.
+    Advances in Engineering Software 95, 51–67.
+    https://doi.org/10.1016/j.advengsoft.2016.01.008
+    """
+
     def next_epoch(self) -> None:
         if self.best_whale is None:
             return

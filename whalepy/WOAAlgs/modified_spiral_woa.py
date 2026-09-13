@@ -9,6 +9,18 @@ from whalepy.models.enums.boundary_constrain import repair_position
 
 
 class ModifiedSpiralWOA(BaseWOAAlg):
+    """
+    ModifiedSpiralWOA
+
+    Links:
+    https://www.mdpi.com/2073-8994/10/6/210
+
+    References:
+    Sun, W., Wang, J., Wei, X., 2018. An Improved Whale Optimization
+    Algorithm Based on Different Searching Paths and Perceptual Disturbance.
+    Symmetry 10, 210. https://doi.org/10.3390/sym10060210
+    """
+
     def next_epoch(self) -> None:
         if self.best_whale is None:
             return

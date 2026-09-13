@@ -8,6 +8,18 @@ from whalepy.models.whale import Whale
 
 
 class OppositionBasedWOA(WOA):
+    """
+    OppositionBasedWOA
+
+    Links:
+    https://www.ingentaconnect.com/content/asp/asl/2018/00000024/00000010/art00089
+
+    References:
+    Alamri, H.S., Alsariera, Y.A., Zamli, K.Z., 2018. Opposition-Based Whale
+    Optimization Algorithm. adv sci lett 24, 7461–7464.
+    https://doi.org/10.1166/asl.2018.12959
+    """
+
     def initialization_nfe_cost(self) -> int:
         return 2 * int(self.config.population_size)
 

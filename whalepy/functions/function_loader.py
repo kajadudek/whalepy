@@ -7,18 +7,38 @@ from typing import Any, Callable
 
 
 class FunctionLoader:
+    """
+    Access to the built-in benchmark functions: Ackley, Eggholder, Griewank, Michalewicz,
+    Rana, Rastrigin, Rosenbrock, Schwefel, and Sphere.
+
+    Example:
+        >>> rastrigin = FunctionLoader().load_callable("rastrigin")
+        >>> rastrigin([0.0, 0.0])
+        0.0
+    """
+
     def __init__(self, base_path: Path | None = None) -> None:
         self.base_path = base_path or Path(__file__).parent / "functions_info"
 
     def list_functions(self) -> list[str]:
+        """
+        Returns the names of the available benchmark functions.
+        """
         return sorted(path.stem for path in self.base_path.glob("*.json"))
 
     def load_metadata(self, name: str) -> dict[str, Any]:
+        """
+        Returns the metadata of a benchmark function stored in its JSON file.
+        """
         file_path = self.base_path / f"{name}.json"
         with file_path.open("r", encoding="ascii") as handle:
             return json.load(handle)
 
     def load_callable(self, name: str) -> Callable[[list[float]], float]:
+        """
+        Returns the benchmark function with the given name. The function takes a list of
+        decision variables and returns its value.
+        """
         normalized_name = name.strip().lower()
         functions = {
             "ackley": ackley,
